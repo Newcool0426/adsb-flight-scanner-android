@@ -225,14 +225,18 @@ public class ControllerService extends Service implements
 			if (scanMode.equals("ADSB")) {
 				mDoUat = false;
 				Dump1090.start(mUsbManager, mDevice);
+				Toast.makeText(this, "Dump1090 started", Toast.LENGTH_SHORT).show();
 			} else if (scanMode.equals("UAT")) {
 				mDoUat = true;
 				Dump978.start(mUsbManager, mDevice);
+				Toast.makeText(this, "Dump978 started", Toast.LENGTH_SHORT).show();
 			} else {
-				if (mDoUat)
+				if (mDoUat) {
 					Dump978.start(mUsbManager, mDevice);
-				else {
+					Toast.makeText(this, "Dump978 started", Toast.LENGTH_SHORT).show();
+				} else {
 					Dump1090.start(mUsbManager, mDevice);
+					Toast.makeText(this, "Dump1090 started", Toast.LENGTH_SHORT).show();
 				}
 
 				mScanTimer = new Thread() {
@@ -251,6 +255,7 @@ public class ControllerService extends Service implements
 
 			mIsScanning = true;
 		} catch (Exception e) {
+			Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
 			e.printStackTrace();
 		}
 	}
