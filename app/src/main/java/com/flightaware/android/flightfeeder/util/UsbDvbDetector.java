@@ -71,6 +71,10 @@ public class UsbDvbDetector {
 		return null;
 	}
 
+	public static int getFilterSize() {
+		return sDevices.size();
+	}
+
 	// prevent construction
 	private UsbDvbDetector() {
 

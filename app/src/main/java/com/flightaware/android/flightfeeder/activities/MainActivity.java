@@ -466,19 +466,18 @@ public class MainActivity extends AppCompatActivity implements
         mService = ((ControllerService.LocalBinder) service).getService();
         mService.stopForeground(true);
 
-        android.util.Log.d("FlightFeeder", "onServiceConnected: checking for USB device");
-
         UsbManager usbMgr = (UsbManager) getSystemService(Context.USB_SERVICE);
         java.util.HashMap<String, UsbDevice> devList = usbMgr.getDeviceList();
-        android.util.Log.d("FlightFeeder", "Connected USB devices: " + devList.size());
+
+        int filterCount = UsbDvbDetector.getFilterSize();
+        StringBuilder sb = new StringBuilder();
+        sb.append("USB:").append(devList.size()).append(" Filter:").append(filterCount);
         for (UsbDevice d : devList.values()) {
-            android.util.Log.d("FlightFeeder", "  USB: vendor=" + d.getVendorId()
-                    + " product=" + d.getProductId() + " deviceName=" + d.getDeviceName());
+            sb.append(" [").append(d.getVendorId()).append(":").append(d.getProductId()).append("]");
         }
+        Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
 
         UsbDevice device = UsbDvbDetector.isValidDeviceConnected(this);
-        android.util.Log.d("FlightFeeder", "isValidDeviceConnected returns: " + (device != null ? device.getDeviceName() : "null"));
-
         if (device != null) {
             startListening(device);
         } else if (mAlert == null || !mAlert.isShowing()) {
