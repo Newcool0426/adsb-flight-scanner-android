@@ -57,6 +57,12 @@ public class Dump1090 extends Analyzer {
 
 		@Override
 		public void onProcessStopped(int exitCode, Exception e) {
+			String msg = "RtlTcp stopped: exit=" + exitCode;
+			if (e != null) msg += " " + e.getMessage();
+			android.widget.Toast.makeText(
+				com.flightaware.android.flightfeeder.App.sContext,
+				msg, android.widget.Toast.LENGTH_LONG).show();
+
 			if (sReadThread != null) {
 				sReadThread.interrupt();
 				sReadThread = null;
