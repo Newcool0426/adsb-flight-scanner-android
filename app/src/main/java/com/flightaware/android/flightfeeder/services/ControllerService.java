@@ -262,11 +262,11 @@ public class ControllerService extends Service implements
 				mScanTimer.start();
 			}
 
-			mIsScanning = true;
-		} catch (Exception e) {
-			Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-		}
+            mIsScanning = true;
+        } catch (Throwable t) {
+            Toast.makeText(this, "Error: " + t.getClass().getSimpleName() + ": " + t.getMessage(), Toast.LENGTH_LONG).show();
+            t.printStackTrace();
+        }
 	}
 
 	public void stopScanning(boolean allowAutoRestart) {

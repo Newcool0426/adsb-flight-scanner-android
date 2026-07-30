@@ -86,52 +86,57 @@ public class RtlTcp {
 
 		new Thread() {
 			public void run() {
-				long maxWait = 10000;
-				Exception e = null;
+				try {
+					long maxWait = 10000;
+					Exception e = null;
 
-				if (isNativeRunning()) {
-					close();
+					if (isNativeRunning()) {
+						close();
 
-					long waited = 0;
-					while (isNativeRunning() && waited < maxWait) {
-						SystemClock.sleep(100);
+						long waited = 0;
+						while (isNativeRunning() && waited < maxWait) {
+							SystemClock.sleep(100);
 
-						waited += 100;
+							waited += 100;
+						}
+
+						if (isNativeRunning() && sListener != null) {
+							sListener.onProcessStopped(sExitCode, new Exception(
+									String.valueOf(EXIT_CANNOT_RESTART)));
+
+							return;
+						}
 					}
 
-					if (isNativeRunning() && sListener != null) {
-						sListener.onProcessStopped(sExitCode, new Exception(
-								String.valueOf(EXIT_CANNOT_RESTART)));
+					sListener = listener;
 
-						return;
+					sExitCode = EXIT_UNKNOWN;
+
+					open(args, fd, uspfs_path);
+
+					if (isNativeRunning()) {
+						close();
+
+						long waited = 0;
+						while (isNativeRunning() && waited < maxWait) {
+							SystemClock.sleep(100);
+
+							waited += 100;
+						}
+
+						if (isNativeRunning())
+							sExitCode = EXIT_CANNOT_CLOSE;
 					}
+
+					if (sExitCode != EXIT_OK)
+						e = new Exception(String.valueOf(sExitCode));
+
+					if (sListener != null)
+						sListener.onProcessStopped(sExitCode, e);
+				} catch (Throwable t) {
+					if (sListener != null)
+						sListener.onProcessStopped(sExitCode, t instanceof Exception ? (Exception) t : new Exception(String.valueOf(sExitCode), t));
 				}
-
-				sListener = listener;
-
-				sExitCode = EXIT_UNKNOWN;
-
-				open(args, fd, uspfs_path);
-
-				if (isNativeRunning()) {
-					close();
-
-					long waited = 0;
-					while (isNativeRunning() && waited < maxWait) {
-						SystemClock.sleep(100);
-
-						waited += 100;
-					}
-
-					if (isNativeRunning())
-						sExitCode = EXIT_CANNOT_CLOSE;
-				}
-
-				if (sExitCode != EXIT_OK)
-					e = new Exception(String.valueOf(sExitCode));
-
-				if (sListener != null)
-					sListener.onProcessStopped(sExitCode, e);
 			};
 		}.start();
 	}

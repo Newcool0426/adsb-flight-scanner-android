@@ -26,26 +26,30 @@ public class Dump1090 extends Analyzer {
 
 		@Override
 		public void onProcessStarted() {
-			// Start threads in this order so that each consumer thread is
-			// running before its upstream producer
-			if (sDecodeThread == null) {
-				sDecodeThread = new DecodeFramesThread();
-				sDecodeThread.start();
-			}
+			try {
+				// Start threads in this order so that each consumer thread is
+				// running before its upstream producer
+				if (sDecodeThread == null) {
+					sDecodeThread = new DecodeFramesThread();
+					sDecodeThread.start();
+				}
 
-			if (sDetectThread == null) {
-				sDetectThread = new DetectModeSThread();
-				sDetectThread.start();
-			}
+				if (sDetectThread == null) {
+					sDetectThread = new DetectModeSThread();
+					sDetectThread.start();
+				}
 
-			if (sComputeThread == null) {
-				sComputeThread = new ComputeMagnitudeVectorThread();
-				sComputeThread.start();
-			}
+				if (sComputeThread == null) {
+					sComputeThread = new ComputeMagnitudeVectorThread();
+					sComputeThread.start();
+				}
 
-			if (sReadThread == null) {
-				sReadThread = new GetRtlSdrDataThread();
-				sReadThread.start();
+				if (sReadThread == null) {
+					sReadThread = new GetRtlSdrDataThread();
+					sReadThread.start();
+				}
+			} catch (Throwable t) {
+				t.printStackTrace();
 			}
 		}
 
