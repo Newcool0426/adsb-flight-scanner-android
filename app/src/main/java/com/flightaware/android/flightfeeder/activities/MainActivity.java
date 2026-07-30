@@ -46,6 +46,7 @@ import com.flightaware.android.flightfeeder.analyzers.RecentAircraftCache;
 import com.flightaware.android.flightfeeder.services.ControllerService;
 import com.flightaware.android.flightfeeder.services.LocationService;
 import com.flightaware.android.flightfeeder.util.MovingAverage;
+import com.flightaware.android.flightfeeder.util.UsbDvbDetector;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -338,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (mService != null)
                     mService.stopScanning(false);
             } else {
-//                device = UsbDvbDetector.isValidDeviceConnected(this);
+                device = UsbDvbDetector.isValidDeviceConnected(this);
 
                 if (device != null) {
                     UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
