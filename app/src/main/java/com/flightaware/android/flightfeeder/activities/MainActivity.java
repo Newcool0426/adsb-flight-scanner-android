@@ -468,7 +468,18 @@ public class MainActivity extends AppCompatActivity implements
 
         UsbDevice device = UsbDvbDetector.isValidDeviceConnected(this);
         if (device != null) {
-            startListening(device);
+            UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+            if (usbManager.hasPermission(device)
+                    || App.sPrefs.getBoolean("usb_permission_granted", false)) {
+                startListening(device);
+            } else {
+                int flags = 0;
+                if (android.os.Build.VERSION.SDK_INT >= 31)
+                    flags = PendingIntent.FLAG_IMMUTABLE;
+                PendingIntent permission = PendingIntent.getBroadcast(
+                        this, 0, new Intent(ACTION_USB_PERMISSION), flags);
+                usbManager.requestPermission(device, permission);
+            }
         } else if (mAlert == null || !mAlert.isShowing()) {
             showNoDongle();
         }
