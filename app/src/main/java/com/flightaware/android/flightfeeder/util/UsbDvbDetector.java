@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 public class UsbDvbDetector {
 
+	private static final String TAG = "FlightFeeder";
 	private static HashSet<String> sDevices = new HashSet<String>();
 
 	public static UsbDevice isValidDeviceConnected(Context context) {
@@ -37,10 +38,15 @@ public class UsbDvbDetector {
 					eventType = xrp.next();
 				}
 			} catch (Exception ex) {
-				// swallow
+				android.util.Log.e(TAG, "Error parsing device_filter.xml", ex);
 			} finally {
 				if (xrp != null)
 					xrp.close();
+			}
+
+			android.util.Log.d(TAG, "Device filter has " + sDevices.size() + " entries");
+			for (String s : sDevices) {
+				android.util.Log.d(TAG, "  filter: " + s);
 			}
 		}
 
@@ -53,10 +59,15 @@ public class UsbDvbDetector {
 			UsbDevice device = deviceIterator.next();
 			String ident = device.getVendorId() + "-" + device.getProductId();
 
-			if (sDevices.contains(ident))
+			android.util.Log.d(TAG, "Checking USB device: " + ident);
+
+			if (sDevices.contains(ident)) {
+				android.util.Log.d(TAG, "MATCH found: " + ident);
 				return device;
+			}
 		}
 
+		android.util.Log.d(TAG, "No matching USB device found");
 		return null;
 	}
 
