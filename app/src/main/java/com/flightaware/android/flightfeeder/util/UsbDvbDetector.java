@@ -75,6 +75,10 @@ public class UsbDvbDetector {
 		return sDevices.size();
 	}
 
+	public static java.util.HashSet<String> getFilterSet() {
+		return sDevices;
+	}
+
 	// prevent construction
 	private UsbDvbDetector() {
 

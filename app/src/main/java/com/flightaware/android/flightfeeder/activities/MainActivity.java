@@ -471,11 +471,21 @@ public class MainActivity extends AppCompatActivity implements
 
         int filterCount = UsbDvbDetector.getFilterSize();
         StringBuilder sb = new StringBuilder();
-        sb.append("USB:").append(devList.size()).append(" Filter:").append(filterCount);
+        sb.append("USB:").append(devList.size()).append(" Filter:").append(filterCount).append("\n");
         for (UsbDevice d : devList.values()) {
-            sb.append(" [").append(d.getVendorId()).append(":").append(d.getProductId()).append("]");
+            sb.append("  VID:PID=").append(d.getVendorId()).append(":").append(d.getProductId())
+              .append(" name=").append(d.getDeviceName()).append("\n");
         }
-        Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
+        sb.append("Filter entries:\n");
+        java.util.HashSet<String> filters = UsbDvbDetector.getFilterSet();
+        for (String f : filters) {
+            sb.append("  ").append(f).append("\n");
+        }
+        try {
+            java.io.FileOutputStream fos = openFileOutput("usb_debug.txt", Context.MODE_PRIVATE);
+            fos.write(sb.toString().getBytes());
+            fos.close();
+        } catch (Exception e) { }
 
         UsbDevice device = UsbDvbDetector.isValidDeviceConnected(this);
         if (device != null) {
