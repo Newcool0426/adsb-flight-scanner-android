@@ -104,6 +104,26 @@ public class Dump1090 extends Analyzer {
 
 		RtlTcp.start("-f 1090e6 -s 2.4e6", fileDescriptor, deviceName,
 				sListener);
+
+		if (sDecodeThread == null) {
+			sDecodeThread = new DecodeFramesThread();
+			sDecodeThread.start();
+		}
+
+		if (sDetectThread == null) {
+			sDetectThread = new DetectModeSThread();
+			sDetectThread.start();
+		}
+
+		if (sComputeThread == null) {
+			sComputeThread = new ComputeMagnitudeVectorThread();
+			sComputeThread.start();
+		}
+
+		if (sReadThread == null) {
+			sReadThread = new GetRtlSdrDataThread();
+			sReadThread.start();
+		}
 	}
 
 	public static void stop() {
