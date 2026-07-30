@@ -42,6 +42,19 @@ public class GetRtlSdrDataThread extends Thread {
 				}
 			}
 
+			if (socket == null) {
+				android.widget.Toast.makeText(
+					com.flightaware.android.flightfeeder.App.sContext,
+					"RtlTcp: socket connect failed after 3s",
+					android.widget.Toast.LENGTH_LONG).show();
+				return;
+			}
+
+			android.widget.Toast.makeText(
+				com.flightaware.android.flightfeeder.App.sContext,
+				"RtlTcp: connected",
+				android.widget.Toast.LENGTH_SHORT).show();
+
 			InputStream stream = socket.getInputStream();
 
 			byte[] buffer = new byte[BUFFER_SIZE];

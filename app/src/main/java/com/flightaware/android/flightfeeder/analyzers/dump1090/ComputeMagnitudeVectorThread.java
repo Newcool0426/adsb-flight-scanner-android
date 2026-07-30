@@ -68,11 +68,21 @@ public class ComputeMagnitudeVectorThread extends Thread {
 		if (BuildConfig.DEBUG)
 			System.out.println("Started generating vectors");
 
+		boolean first = true;
+
 		while (!Dump1090.sExit) {
 			byte[] data = RtlSdrDataQueue.take();
 
 			if (data == null)
 				continue;
+
+			if (first) {
+				first = false;
+				android.widget.Toast.makeText(
+					com.flightaware.android.flightfeeder.App.sContext,
+					"Data flowing: " + data.length + " bytes",
+					android.widget.Toast.LENGTH_SHORT).show();
+			}
 
 			computeMagnitudeVector(data);
 		}

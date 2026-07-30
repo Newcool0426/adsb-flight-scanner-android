@@ -100,6 +100,11 @@ public class Dump1090 extends Analyzer {
 			throw new RuntimeException(
 					"USB file descriptor or device name is invalid");
 
+		android.widget.Toast.makeText(
+			com.flightaware.android.flightfeeder.App.sContext,
+			"fd=" + fileDescriptor + " path=" + deviceName,
+			android.widget.Toast.LENGTH_SHORT).show();
+
 		sExit = false;
 
 		RtlTcp.start("-f 1090e6 -s 2.4e6", fileDescriptor, deviceName,
