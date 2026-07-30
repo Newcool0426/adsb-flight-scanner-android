@@ -312,58 +312,63 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onNewIntent(Intent intent) {
-        if (intent != null) {
-            String action = intent.getAction();
+        try {
+            if (intent != null) {
+                String action = intent.getAction();
 
-            if (TextUtils.isEmpty(action))
-                return;
+                if (TextUtils.isEmpty(action))
+                    return;
 
-            UsbDevice device = null;
+                UsbDevice device = null;
 
-            if (action
-                    .equals("android.hardware.usb.action.USB_DEVICE_ATTACHED")) {
-                synchronized (this) {
-                    device = (UsbDevice) intent
-                            .getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (action
+                        .equals("android.hardware.usb.action.USB_DEVICE_ATTACHED")) {
+                    synchronized (this) {
+                        device = (UsbDevice) intent
+                                .getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+                        if (device != null) {
+                            if (mService != null && !mService.isScanning()) {
+                                UsbManager usbMgr = (UsbManager) getSystemService(Context.USB_SERVICE);
+                                if (usbMgr.hasPermission(device)) {
+                                    startListening(device);
+                                }
+                            }
+                        } else if (mAlert == null || !mAlert.isShowing())
+                            showNoDongle();
+                    }
+                } else if (action
+                        .equals("android.hardware.usb.action.USB_DEVICE_DETACHED")) {
+                    if (mAlert == null || !mAlert.isShowing())
+                        showNoDongle();
+
+                    if (mService != null)
+                        mService.stopScanning(false);
+                } else {
+                    device = UsbDvbDetector.isValidDeviceConnected(this);
 
                     if (device != null) {
-                        if (mService != null && !mService.isScanning()) {
-                            UsbManager usbMgr = (UsbManager) getSystemService(Context.USB_SERVICE);
-                            if (usbMgr.hasPermission(device)) {
-                                startListening(device);
-                            }
+                        UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+                        if (usbManager.hasPermission(device)
+                                || App.sPrefs.getBoolean("usb_permission_granted",
+                                false))
+                            startListening(device);
+                        else {
+                            int flags = 0;
+                            if (android.os.Build.VERSION.SDK_INT >= 31)
+                                flags = PendingIntent.FLAG_IMMUTABLE;
+                            PendingIntent permission = PendingIntent.getBroadcast(
+                                    this, 0, new Intent(ACTION_USB_PERMISSION), flags);
+
+                            usbManager.requestPermission(device, permission);
                         }
                     } else if (mAlert == null || !mAlert.isShowing())
                         showNoDongle();
                 }
-            } else if (action
-                    .equals("android.hardware.usb.action.USB_DEVICE_DETACHED")) {
-                if (mAlert == null || !mAlert.isShowing())
-                    showNoDongle();
-
-                if (mService != null)
-                    mService.stopScanning(false);
-            } else {
-                device = UsbDvbDetector.isValidDeviceConnected(this);
-
-                if (device != null) {
-                    UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-                    if (usbManager.hasPermission(device)
-                            || App.sPrefs.getBoolean("usb_permission_granted",
-                            false))
-                        startListening(device);
-                    else {
-                        int flags = 0;
-                        if (android.os.Build.VERSION.SDK_INT >= 31)
-                            flags = PendingIntent.FLAG_IMMUTABLE;
-                        PendingIntent permission = PendingIntent.getBroadcast(
-                                this, 0, new Intent(ACTION_USB_PERMISSION), flags);
-
-                        usbManager.requestPermission(device, permission);
-                    }
-                } else if (mAlert == null || !mAlert.isShowing())
-                    showNoDongle();
             }
+        } catch (Throwable t) {
+            Toast.makeText(this, "Crash: " + t.getClass().getSimpleName() + ": " + t.getMessage(), Toast.LENGTH_LONG).show();
+            t.printStackTrace();
         }
     }
 
