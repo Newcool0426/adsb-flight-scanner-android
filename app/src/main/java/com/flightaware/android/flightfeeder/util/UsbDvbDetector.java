@@ -1,13 +1,8 @@
 package com.flightaware.android.flightfeeder.util;
 
 import android.content.Context;
-import android.content.res.XmlResourceParser;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-
-import com.flightaware.android.flightfeeder.R;
-
-import org.xmlpull.v1.XmlPullParser;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,41 +10,38 @@ import java.util.Iterator;
 
 public class UsbDvbDetector {
 
-	private static final String TAG = "FlightFeeder";
 	private static HashSet<String> sDevices = new HashSet<String>();
 
-	public static UsbDevice isValidDeviceConnected(Context context) {
-		if (sDevices.size() == 0) {
-			XmlResourceParser xrp = null;
-			try {
-				xrp = context.getResources().getXml(R.xml.device_filter);
-				xrp.next();
-				int eventType = xrp.getEventType();
-				while (eventType != XmlPullParser.END_DOCUMENT) {
-					if (eventType == XmlPullParser.START_TAG
-							&& xrp.getName().equalsIgnoreCase("usb-device")) {
-						String ident = xrp.getAttributeIntValue(0, -1) + "-"
-								+ xrp.getAttributeIntValue(1, -1);
-
-						if (!ident.contains("-1"))
-							sDevices.add(ident);
-					}
-
-					eventType = xrp.next();
-				}
-			} catch (Exception ex) {
-				android.util.Log.e(TAG, "Error parsing device_filter.xml", ex);
-			} finally {
-				if (xrp != null)
-					xrp.close();
-			}
-
-			android.util.Log.d(TAG, "Device filter has " + sDevices.size() + " entries");
-			for (String s : sDevices) {
-				android.util.Log.d(TAG, "  filter: " + s);
-			}
+	static {
+		int[][] ids = {
+			{ 0x0bda, 0x2832 }, { 0x0bda, 0x2838 },
+			{ 0x0413, 0x6680 }, { 0x0413, 0x6f0f },
+			{ 0x0458, 0x707f }, { 0x0ccd, 0x00a9 },
+			{ 0x0ccd, 0x00b3 }, { 0x0ccd, 0x00b4 },
+			{ 0x0ccd, 0x00b5 }, { 0x0ccd, 0x00b7 },
+			{ 0x0ccd, 0x00b8 }, { 0x0ccd, 0x00b9 },
+			{ 0x0ccd, 0x00c0 }, { 0x0ccd, 0x00c6 },
+			{ 0x0ccd, 0x00d3 }, { 0x0ccd, 0x00d7 },
+			{ 0x0ccd, 0x00e0 }, { 0x1554, 0x5020 },
+			{ 0x15f4, 0x0131 }, { 0x185b, 0x0620 },
+			{ 0x185b, 0x0650 }, { 0x185b, 0x0680 },
+			{ 0x1b80, 0xd393 }, { 0x1b80, 0xd394 },
+			{ 0x1b80, 0xd395 }, { 0x1b80, 0xd397 },
+			{ 0x1b80, 0xd398 }, { 0x1b80, 0xd39d },
+			{ 0x1b80, 0xd3a4 }, { 0x1b80, 0xd3a8 },
+			{ 0x1b80, 0xd3af }, { 0x1b80, 0xd3b0 },
+			{ 0x1d19, 0x1101 }, { 0x1d19, 0x1102 },
+			{ 0x1d19, 0x1103 }, { 0x1d19, 0x1104 },
+			{ 0x1f4d, 0xa803 }, { 0x1f4d, 0xb803 },
+			{ 0x1f4d, 0xc803 }, { 0x1f4d, 0xd286 },
+			{ 0x1f4d, 0xd803 },
+		};
+		for (int[] pair : ids) {
+			sDevices.add(pair[0] + "-" + pair[1]);
 		}
+	}
 
+	public static UsbDevice isValidDeviceConnected(Context context) {
 		UsbManager usbManager = (UsbManager) context
 				.getSystemService(Context.USB_SERVICE);
 
@@ -59,15 +51,10 @@ public class UsbDvbDetector {
 			UsbDevice device = deviceIterator.next();
 			String ident = device.getVendorId() + "-" + device.getProductId();
 
-			android.util.Log.d(TAG, "Checking USB device: " + ident);
-
-			if (sDevices.contains(ident)) {
-				android.util.Log.d(TAG, "MATCH found: " + ident);
+			if (sDevices.contains(ident))
 				return device;
-			}
 		}
 
-		android.util.Log.d(TAG, "No matching USB device found");
 		return null;
 	}
 
@@ -79,7 +66,6 @@ public class UsbDvbDetector {
 		return sDevices;
 	}
 
-	// prevent construction
 	private UsbDvbDetector() {
 
 	}

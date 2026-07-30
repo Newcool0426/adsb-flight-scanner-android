@@ -466,27 +466,6 @@ public class MainActivity extends AppCompatActivity implements
         mService = ((ControllerService.LocalBinder) service).getService();
         mService.stopForeground(true);
 
-        UsbManager usbMgr = (UsbManager) getSystemService(Context.USB_SERVICE);
-        java.util.HashMap<String, UsbDevice> devList = usbMgr.getDeviceList();
-
-        int filterCount = UsbDvbDetector.getFilterSize();
-        StringBuilder sb = new StringBuilder();
-        sb.append("USB:").append(devList.size()).append(" Filter:").append(filterCount).append("\n");
-        for (UsbDevice d : devList.values()) {
-            sb.append("  VID:PID=").append(d.getVendorId()).append(":").append(d.getProductId())
-              .append(" name=").append(d.getDeviceName()).append("\n");
-        }
-        sb.append("Filter entries:\n");
-        java.util.HashSet<String> filters = UsbDvbDetector.getFilterSet();
-        for (String f : filters) {
-            sb.append("  ").append(f).append("\n");
-        }
-        try {
-            java.io.FileOutputStream fos = openFileOutput("usb_debug.txt", Context.MODE_PRIVATE);
-            fos.write(sb.toString().getBytes());
-            fos.close();
-        } catch (Exception e) { }
-
         UsbDevice device = UsbDvbDetector.isValidDeviceConnected(this);
         if (device != null) {
             startListening(device);
