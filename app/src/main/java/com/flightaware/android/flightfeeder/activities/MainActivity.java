@@ -326,9 +326,14 @@ public class MainActivity extends AppCompatActivity implements
                     device = (UsbDevice) intent
                             .getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
-                    if (device != null)
-                        startListening(device);
-                    else if (mAlert == null || !mAlert.isShowing())
+                    if (device != null) {
+                        if (mService != null && !mService.isScanning()) {
+                            UsbManager usbMgr = (UsbManager) getSystemService(Context.USB_SERVICE);
+                            if (usbMgr.hasPermission(device)) {
+                                startListening(device);
+                            }
+                        }
+                    } else if (mAlert == null || !mAlert.isShowing())
                         showNoDongle();
                 }
             } else if (action

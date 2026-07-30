@@ -180,14 +180,17 @@ public class ControllerService extends Service implements
 	public void showNotification() {
 		Intent resultIntent = new Intent(this, MainActivity.class);
 
+		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+		if (android.os.Build.VERSION.SDK_INT >= 31)
+			flags |= PendingIntent.FLAG_IMMUTABLE;
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0,
-				resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+				resultIntent, flags);
 
 		Intent stopIntent = new Intent(
 				"com.flightaware.android.flightfeeder.STOP");
 
 		PendingIntent pendingStopIntent = PendingIntent.getBroadcast(this, 0,
-				stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+				stopIntent, flags);
 
 		String title = getString(R.string.app_name);
 		String notice = getString(R.string.text_running_in_background);
@@ -216,7 +219,12 @@ public class ControllerService extends Service implements
 		startForeground(R.string.app_name, builder.build());
 	}
 
-	public void startScanning() {
+	public synchronized void startScanning() {
+		if (mIsScanning) {
+			android.util.Log.d("ControllerService", "scanning already in progress");
+			return;
+		}
+
 		Analyzer.sFrameCount = 0;
 		MovingAverage.reset();
 
