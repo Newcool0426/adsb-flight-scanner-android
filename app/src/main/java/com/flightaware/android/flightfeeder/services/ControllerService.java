@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
+import android.widget.Toast;
 import android.support.v4.app.NotificationCompat;
 
 import com.flightaware.android.flightfeeder.App;
