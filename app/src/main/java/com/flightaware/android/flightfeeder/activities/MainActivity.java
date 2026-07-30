@@ -348,8 +348,11 @@ public class MainActivity extends AppCompatActivity implements
                             false))
                         startListening(device);
                     else {
+                        int flags = 0;
+                        if (android.os.Build.VERSION.SDK_INT >= 31)
+                            flags = PendingIntent.FLAG_IMMUTABLE;
                         PendingIntent permission = PendingIntent.getBroadcast(
-                                this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+                                this, 0, new Intent(ACTION_USB_PERMISSION), flags);
 
                         usbManager.requestPermission(device, permission);
                     }
@@ -463,7 +466,12 @@ public class MainActivity extends AppCompatActivity implements
         mService = ((ControllerService.LocalBinder) service).getService();
         mService.stopForeground(true);
 
-        onNewIntent(getIntent());
+        UsbDevice device = UsbDvbDetector.isValidDeviceConnected(this);
+        if (device != null) {
+            startListening(device);
+        } else if (mAlert == null || !mAlert.isShowing()) {
+            showNoDongle();
+        }
     }
 
     @Override
